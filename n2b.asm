@@ -101,7 +101,7 @@ _start:
   mov rdi, xchars
   mov rsi, rax
   call _print
-  ; print .\n
+  ; print ".\n"
   mov rdi, convoutend_s
   mov rsi, convoutend_l
   call _print
