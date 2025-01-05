@@ -1,7 +1,7 @@
 AS = nasm
 ASFLAGS = -f macho64
 LN = ld
-LNFLAGS = -lSystem -L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
+LNFLAGS = -e _start -static
 
 PROJECT = n2b
 

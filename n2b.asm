@@ -36,13 +36,15 @@ section .data
   err_invalid_digitl_l equ $ - err_invalid_digitl_s
   err_invalid_digitr_s db "', must be between '0' and '9'", 10
   err_invalid_digitr_l equ $ - err_invalid_digitr_s
-  err_invalid_base_s db "Invalid base, must be within the range 2..=36", 10
-  err_invalid_base_l equ $ - err_invalid_base_s
+  err_invalid_basel_s db "Invalid base "
+  err_invalid_basel_l equ $ - err_invalid_basel_s 
+  err_invalid_baser_s db ", must be within the range 2..=36", 10
+  err_invalid_baser_l equ $ - err_invalid_baser_s 
 
 section .text
-  global _main
+  global _start
 
-_main:
+_start:
   ; ask for number
   mov rdi, numberin_s
   mov rsi, numberin_l
@@ -66,13 +68,14 @@ _main:
   mov rsi, BASE_LEN
   call _input
   ; calculate base length
-  mov r10, rax
-  dec r10 ; without line feed
+  mov rdx, rax
+  dec rdx ; without line feed
   ; convert base from string to number
   call _atoi
   mov r11, rax ; save base
   ; validate converted base
   mov rdi, r11
+  mov rsi, base
   call _validate_base
   ; print message
   call _putlf
@@ -83,7 +86,7 @@ _main:
   mov rsi, convoutl_l
   call _print
   mov rdi, base
-  mov rsi, r10
+  mov rsi, rdx
   call _print
   mov rdi, convoutr_s
   mov rsi, convoutr_l
@@ -320,7 +323,7 @@ _atoi_loop:
 _ret:
   ret
 
-; exits with the error message indicating that the
+; exits with an error message indicating that the
 ; digit in rcx is invalid
 _err_invalid_digit:
   ; print the left-hand part of the error message
@@ -341,6 +344,8 @@ _err_invalid_digit:
 
 ; validates the base in rdi, exiting with an error
 ; message if it is not within the range 2..=36
+; [rsi] must be a buffer containing the numeric digits
+; of the base, and rdx must be its length
 _validate_base:
   cmp rdi, 2
   jl _err_invalid_base
@@ -348,13 +353,22 @@ _validate_base:
   jg _err_invalid_base
   ret
 
-; exits with the error message indicating that the
-; given base is invalid as it does not fall within
-; the required range
+; exits with an error message indicating that the
+; base (with digits [rsi] and length rdx) is invalid
+; as it does not fall within the required range
 _err_invalid_base:
-  ; print error message
-  mov rdi, err_invalid_base_s
-  mov rsi, err_invalid_base_l
+  push rsi
+  ; print left-hand part of error message
+  mov rdi, err_invalid_basel_s
+  mov rsi, err_invalid_basel_l
+  call _eprint
+  ; print base
+  pop rdi
+  mov rsi, rdx
+  call _eprint
+  ; print right-hand part of error message
+  mov rdi, err_invalid_baser_s
+  mov rsi, err_invalid_baser_l
   call _eprint
   ; exit with failure
   mov rdi, 1
